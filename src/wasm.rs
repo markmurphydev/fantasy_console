@@ -7,7 +7,7 @@ use std::fmt::{Display, Formatter};
 pub struct Byte(pub u8);
 
 // TODO -- ugggh
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Integer(pub u64);
 
 impl Display for Integer {
@@ -18,8 +18,15 @@ impl Display for Integer {
 
 // ==== Wasm Types ====
 
+#[derive(Copy, Clone)]
 pub enum Instruction {
     ConstI64(Integer)
+}
+
+impl Instruction {
+    pub const FALSE: Instruction = Instruction::ConstI64(Integer(0b0001));
+    pub const TRUE: Instruction = Instruction::ConstI64(Integer(0b0011));
+    pub const NIL: Instruction = Instruction::ConstI64(Integer(0b0111));
 }
 
 pub enum FunctionIndex {

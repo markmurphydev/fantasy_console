@@ -16,16 +16,29 @@ impl <'text> Tokenizer<'text> {
     }
 
     pub fn tokenize(mut self) -> Vec<Token> {
+
+        /// Any number of trailing newlines are semantically identical to zero trailing newlines.
+        /// It's more convenient for our parsing to assume zero.
+        fn trim_trailing_newlines(tokens: &mut Vec<Token>) {
+            let trailing_newline_count = tokens.iter().rev().take_while(|tok| **tok == Token::Newline).count();
+            tokens.truncate(tokens.len() - trailing_newline_count);
+        }
+
         loop {
             self.whitespace();
             match self.chars.peek() {
-                None => return self.tokens,
+                None => break,
                 Some(&c) => match c {
+                    '\n' => self.tokens.push(Token::Newline),
+                    ';' => self.tokens.push(Token::Semicolon),
                     c if c.is_ascii_alphabetic() => self.keyword_or_identifier(),
                     _ => panic!("Unexpected character: {:#?}", c)
                 }
             }
         }
+
+        trim_trailing_newlines(&mut self.tokens);
+        self.tokens
     }
 
     fn keyword_or_identifier(&mut self) {
@@ -49,8 +62,9 @@ impl <'text> Tokenizer<'text> {
         }
     }
 
+    /// Consume non-newline whitespace
     fn whitespace(&mut self) {
-        while self.chars.peek().is_some_and(|c| c.is_whitespace()) {
+        while self.chars.peek().is_some_and(|&c| c.is_whitespace() && c != '\n') {
             self.chars.next();
         }
     }
@@ -58,7 +72,7 @@ impl <'text> Tokenizer<'text> {
 
 mod tests {
     use crate::ruby::token::Token;
-    use crate::ruby::tokenizer::Tokenizer;
+    use crate::ruby::tokenize::Tokenizer;
     use Token::*;
 
     #[test]
