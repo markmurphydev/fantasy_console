@@ -3,6 +3,7 @@ use std::iter;
 use crate::wasm::{Expr, Function, FunctionIndex, Instruction, Module};
 
 pub mod wasm;
+mod ruby;
 
 pub struct Printer {
     output: String,
