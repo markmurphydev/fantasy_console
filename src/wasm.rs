@@ -40,5 +40,5 @@ pub struct Expr(pub Vec<Instruction>);
 
 pub struct Module {
     pub functions: Vec<Function>,
-    pub start: FunctionIndex,
+    pub start: Option<FunctionIndex>,
 }

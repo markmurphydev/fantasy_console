@@ -9,7 +9,7 @@ fn main() {
                 body: Expr(vec![Instruction::ConstI64(Integer(0))]),
             }
         ],
-        start: FunctionIndex::Name("main".to_string()),
+        start: Some(FunctionIndex::Name("main".to_string())),
     };
 
     let printer = Printer::new();

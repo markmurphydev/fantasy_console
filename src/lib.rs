@@ -1,5 +1,5 @@
 use std::iter;
-use crate::wasm::{Expr, Function, Instruction, Module};
+use crate::wasm::{Expr, Function, FunctionIndex, Instruction, Module};
 
 pub mod wasm;
 
@@ -19,6 +19,7 @@ impl Printer {
         print!("(module");
         self.indent += 2;
         self.print_functions(module);
+        self.print_start_function(module);
         print!(")");
         self.indent -= 2;
         assert_eq!(self.indent, 0);
@@ -55,6 +56,23 @@ impl Printer {
         self.indent();
         match instr {
             Instruction::ConstI64(n) => print!("i64.const {}", n)
+        }
+    }
+
+    fn print_start_function(&mut self, module: &Module) {
+        if let Some(start_idx) = &module.start {
+            println!();
+            self.indent();
+            print!("(start");
+            match start_idx {
+                FunctionIndex::Index(idx) => {
+                    print!(" {}", idx);
+                }
+                FunctionIndex::Name(name) => {
+                    print!(" ${}", name)
+                }
+            }
+            print!(")");
         }
     }
 
