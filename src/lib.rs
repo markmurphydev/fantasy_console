@@ -1,28 +1,33 @@
+use std::fmt::Write;
 use std::iter;
 use crate::wasm::{Expr, Function, FunctionIndex, Instruction, Module};
 
 pub mod wasm;
 
 pub struct Printer {
+    output: String,
     indent: usize,
 }
 
 impl Printer {
     pub fn new() -> Self {
         Printer {
+            output: String::new(),
             indent: 0
         }
     }
 
-    pub fn print_module(mut self, module: &Module) {
+    pub fn print_module(mut self, module: &Module) -> String {
         self.indent();
-        print!("(module");
+        write!(self.output, "(module").unwrap();
         self.indent += 2;
         self.print_functions(module);
         self.print_start_function(module);
-        print!(")");
+        writeln!(self.output, ")").unwrap();
         self.indent -= 2;
         assert_eq!(self.indent, 0);
+
+        self.output
     }
 
     fn print_functions(&mut self, module: &Module) {
@@ -32,16 +37,16 @@ impl Printer {
     }
 
     fn print_function(&mut self, function: &Function) {
-        println!();
+        writeln!(self.output).unwrap();
         self.indent();
-        print!("(func");
+        write!(self.output, "(func").unwrap();
         if let Some(name) = &function.name {
-            print!(" ${}", name);
+            write!(self.output, " ${}", name).unwrap();
         }
         // TODO -- (type ...)
         self.indent += 2;
         self.print_function_body(&function.body);
-        print!(")");
+        write!(self.output, ")").unwrap();
         self.indent -= 2;
     }
 
@@ -52,32 +57,32 @@ impl Printer {
     }
 
     fn print_instr(&mut self, instr: &Instruction) {
-        println!();
+        writeln!(self.output).unwrap();
         self.indent();
         match instr {
-            Instruction::ConstI64(n) => print!("i64.const {}", n)
+            Instruction::ConstI64(n) => write!(self.output, "i64.const {}", n).unwrap()
         }
     }
 
     fn print_start_function(&mut self, module: &Module) {
         if let Some(start_idx) = &module.start {
-            println!();
+            writeln!(self.output).unwrap();
             self.indent();
-            print!("(start");
+            write!(self.output, "(start").unwrap();
             match start_idx {
                 FunctionIndex::Index(idx) => {
-                    print!(" {}", idx);
+                    write!(self.output, " {}", idx).unwrap();
                 }
                 FunctionIndex::Name(name) => {
-                    print!(" ${}", name)
+                    write!(self.output, " ${}", name).unwrap();
                 }
             }
-            print!(")");
+            write!(self.output, ")").unwrap();
         }
     }
 
-    fn indent(&self) {
-        print!("{}", iter::repeat(' ').take(self.indent).collect::<String>());
+    fn indent(&mut self) {
+        write!(self.output, "{}", iter::repeat(' ').take(self.indent).collect::<String>()).unwrap();
     }
 }
 
